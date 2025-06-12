@@ -11,9 +11,14 @@ public class PeerInfo
 {
     public Guid Id { get; init; }
     public string Username { get; init; } = string.Empty;
-    public IPAddress IPAddress { get; init; } = IPAddress.Any;
+    public IPAddress IPAddress { get; init; } = IPAddress.None;
     public int Port { get; init; }
     public byte[] PublicKey { get; init; } = [];
-    public byte[] PreSharedKey { get; init; } = [];
+    public byte[] PresharedKey { get; init; } = [];
     public DateTime LastSeen { get; set; }
+
+    public override string ToString()
+    {
+        return $"{Username} ({Id}) - {IPAddress}:{Port}, {LastSeen}";
+    }
 }
