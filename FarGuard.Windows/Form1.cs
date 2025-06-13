@@ -27,7 +27,7 @@ namespace FarGuard.Windows
 
         private void PeerConnected()
         {
-            MessageBox.Show("Connected to peer!", "Connection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("CONNECTEEEEEEEEEEEED", "Connection", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.Invoke(new Action(() =>
             {
                 this.Controls.Remove(networkScan);

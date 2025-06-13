@@ -11,13 +11,13 @@ namespace FarGuard.Core.Networking;
 public class PeerDiscoveryService : IDisposable
 {
     private readonly UdpClient _udpClient = new();
-    private readonly CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _token = new();
     private LocalPeerIdentity _identity = new();
     private TcpListener? _tcpListener;
 
-    private const int DiscoveryPort = 49999;
-    private readonly int TcpPortRangeStart = 40000;
-    private readonly int TcpPortRangeCount = 100;
+    private const int _discoveryPort = 49999;
+    private readonly int _tcpPortRangeStart = 40000;
+    private readonly int _tcpPortRangeCount = 100;
 
     public event Action<PeerInfo>? PeerDiscovered;
     public event Action<string>? MessageReceived;
@@ -37,15 +37,15 @@ public class PeerDiscoveryService : IDisposable
 
     public void Start()
     {
-        var tcpPort = TcpPortRangeStart + RandomNumberGenerator.GetInt32(TcpPortRangeCount);
+        var tcpPort = _tcpPortRangeStart + RandomNumberGenerator.GetInt32(_tcpPortRangeCount);
         _identity = LocalPeerIdentity.Generate();
         _identity.ListeningPort = tcpPort;
 
         _tcpListener = new TcpListener(IPAddress.Any, tcpPort);
         _tcpListener.Start();
-        _ = Task.Run(() => AcceptTcpClientsAsync(_tcpListener, _cts.Token));
-        _ = Task.Run(() => BroadcastPresenceAsync(_cts.Token));
-        _ = Task.Run(() => ListenForPeersAsync(_cts.Token));
+        _ = Task.Run(() => AcceptTcpClientsAsync(_tcpListener, _token.Token));
+        _ = Task.Run(() => ListenForPeersAsync(_token.Token));
+        _ = Task.Run(() => BroadcastPresenceAsync(_token.Token));
     }
 
     private LocalPeerIdentity LocalPeerIdentity = new();
@@ -156,7 +156,7 @@ public class PeerDiscoveryService : IDisposable
         var cipherText = new byte[1024];
         var tag = new byte[16];
         PeerInfo = peerInfo;
-        _ = Task.Run(() => ConnectToPeer(tcpClient), _cts.Token);
+        _ = Task.Run(() => ConnectToPeer(tcpClient), _token.Token);
     }
     private async Task BroadcastPresenceAsync(CancellationToken token)
     {
@@ -172,7 +172,7 @@ public class PeerDiscoveryService : IDisposable
 
             var bytes = JsonSerializer.SerializeToUtf8Bytes(message);
 
-            await _udpClient.SendAsync(bytes, bytes.Length, new IPEndPoint(IPAddress.Broadcast, DiscoveryPort));
+            await _udpClient.SendAsync(bytes, bytes.Length, new IPEndPoint(IPAddress.Parse("10.255.255.255"), _discoveryPort));
             await Task.Delay(3000, token);
         }
     }
@@ -180,7 +180,7 @@ public class PeerDiscoveryService : IDisposable
     private async Task ListenForPeersAsync(CancellationToken token)
     {
         _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-        _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, DiscoveryPort));
+        _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, _discoveryPort));
 
         while (!token.IsCancellationRequested)
         {
@@ -212,7 +212,7 @@ public class PeerDiscoveryService : IDisposable
 
     public void Dispose()
     {
-        _cts.Cancel();
+        _token.Cancel();
         _tcpListener?.Stop();
         _udpClient.Dispose();
     }
