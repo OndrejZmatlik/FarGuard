@@ -20,6 +20,9 @@ public class LocalPeerIdentity
     public byte[] PrivateKey { get; init; } = [];
     public byte[] PresharedKey { get; init; } = [];
 
+    private const int _tcpPortRangeStart = 40000;
+    private const int _tcpPortRangeCount = 100;
+
     public static LocalPeerIdentity Generate()
     {
         var privateKey = Curve25519.CreateRandomPrivateKey();
@@ -28,12 +31,13 @@ public class LocalPeerIdentity
         var randomSeed = new byte[32];
         RandomNumberGenerator.Fill(randomSeed);
         var psk = Blake2s.ComputeHash(32, randomSeed);
-
+        var port = _tcpPortRangeStart + RandomNumberGenerator.GetInt32(0, _tcpPortRangeCount);
         return new LocalPeerIdentity
         {
             PrivateKey = privateKey,
             PublicKey = publicKey,
-            PresharedKey = psk
+            PresharedKey = psk,
+            ListeningPort = port
         };
     }
 

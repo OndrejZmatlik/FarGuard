@@ -23,11 +23,14 @@ namespace FarGuard.Windows.Components
 
         public void UpdateList(IEnumerable<PeerInfo> devices)
         {
-            NetworkScan_listBox.Items.Clear();
-            foreach (var item in devices)
+            Invoke(new Action(() =>
             {
-                NetworkScan_listBox.Items.Add(item);
-            }
+                NetworkScan_listBox.Items.Clear();
+                foreach (var item in devices)
+                {
+                    NetworkScan_listBox.Items.Add(item);
+                }
+            }));
         }
         private void button1_Click_1(object sender, EventArgs e)
         {
@@ -44,7 +47,6 @@ namespace FarGuard.Windows.Components
             if (NetworkScan_listBox.SelectedItem is PeerInfo peerInfo)
             {
                 PeerSelected?.Invoke(peerInfo);
-
             }
         }
     }

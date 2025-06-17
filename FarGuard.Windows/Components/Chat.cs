@@ -18,11 +18,32 @@ namespace FarGuard.Windows.Components
             InitializeComponent();
         }
 
+        public void AddPeerMessage(string message, string userName)
+        {
+            this.Invoke(() =>
+            {
+                if (string.IsNullOrWhiteSpace(message)) return;
+                this.listBox1.Items.Add($"{DateTime.Now:HH:mm:ss} - {userName}: {message}");
+                this.listBox1.SelectedIndex = this.listBox1.Items.Count - 1;
+            });
+        }
+
         public void AddMessage(string message)
         {
-            if (string.IsNullOrWhiteSpace(message)) return;
-            this.textBox1.AppendText($"{DateTime.Now:HH:mm:ss} - {message}\r\n");
-            this.textBox1.ScrollToCaret();
+            this.Invoke(() =>
+            {
+                if (string.IsNullOrWhiteSpace(message)) return;
+                this.listBox1.Items.Add($"{DateTime.Now:HH:mm:ss} - You: {message}");
+                this.listBox1.SelectedIndex = this.listBox1.Items.Count - 1;
+            });
+        }
+
+        public void ClearInput()
+        {
+            this.Invoke(() =>
+            {
+                this.textBox1.Clear();
+            });
         }
 
         private void button1_Click(object sender, EventArgs e)

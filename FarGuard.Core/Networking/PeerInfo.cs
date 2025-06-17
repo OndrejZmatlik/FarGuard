@@ -9,12 +9,12 @@ namespace FarGuard.Core.Networking;
 
 public class PeerInfo
 {
-    public Guid Id { get; init; }
-    public string Username { get; init; } = string.Empty;
-    public IPAddress IPAddress { get; init; } = IPAddress.None;
-    public int Port { get; init; }
-    public byte[] PublicKey { get; init; } = [];
-    public byte[] PresharedKey { get; init; } = [];
+    public Guid Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public IPAddress IPAddress { get; set; } = IPAddress.None;
+    public int Port { get; set; }
+    public byte[] PublicKey { get; set; } = [];
+    public byte[] PresharedKey { get; set; } = [];
     public DateTime LastSeen { get; set; }
 
     public override string ToString()
