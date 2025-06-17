@@ -50,5 +50,45 @@ namespace FarGuard.Windows.Components
         {
             MessageSent?.Invoke(this.textBox1.Text);
         }
+
+        public void SetAeadLabel(string l)
+        {
+            this.Invoke(() =>
+ {
+     this.label1.Text = l;
+ });
+        }
+
+        public void SetMyPrivatKeyLabel(string l)
+        {
+            this.Invoke(() =>
+            {
+                this.label2.Text = "MyPrivate: " + l;
+            });
+        }
+
+        public void SetMyPublicKeyLabel(string l)
+        {
+            this.Invoke(() =>
+            {
+                this.label3.Text = "MyPublic: " + l;
+            });
+        }
+
+        public void SetPeerPublicKeyLabel(string l)
+        {
+            this.Invoke(() =>
+            {
+                this.label4.Text = "PeerPublic: " + l;
+            });
+        }
+
+        public void SetPreSharedKeyLabel(string l)
+        {
+            this.Invoke(() =>
+            {
+                this.label5.Text = "PreShared: " + l;
+            });
+        }
     }
 }

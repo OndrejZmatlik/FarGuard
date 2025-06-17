@@ -1,5 +1,6 @@
 ﻿using Blake2Fast;
 using Elliptic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -14,7 +15,7 @@ public class PeerDiscoveryService : IDisposable
 {
     private readonly UdpClient _udpClient = new();
     private readonly CancellationTokenSource _token = new();
-    private LocalPeerIdentity _identity = new();
+    public LocalPeerIdentity _identity = new();
     private TcpListener? _tcpListener;
     private TcpClient _tcpClient = new();
     private NetworkStream? _networkStream;
@@ -44,8 +45,11 @@ public class PeerDiscoveryService : IDisposable
         _ = Task.Run(() => AcceptTcpClientAsync(_tcpListener));
         _ = Task.Run(() => ListenForPeersAsync(_token.Token));
         _ = Task.Run(() => BroadcastPresenceAsync(_token.Token));
-        _ = Task.Run(() => ReceiveMessageAsync());
         _ = Task.Run(() => CheckPeerLive());
+        this.PeerConnected += () =>
+        {
+            _ = Task.Run(() => ReceiveMessageAsync());
+        };
     }
 
     private void CheckPeerLive()
@@ -66,7 +70,7 @@ public class PeerDiscoveryService : IDisposable
         await _tcpClient.ConnectAsync(peerInfo.IPAddress, peerInfo.Port);
         _networkStream = _tcpClient.GetStream();
 
-        var requestMessage = new PeerRequestMessage(_identity.Id, _identity.Username, _identity.PublicKey);
+        var requestMessage = new PeerRequestMessage(_identity.Id, _identity.Username, _identity.PublicKey, _identity.PresharedKey);
         var requestBytes = JsonSerializer.SerializeToUtf8Bytes(requestMessage).Concat("\n"u8.ToArray()).ToArray();
 
         ushort dataLength = (ushort)requestBytes.Length;
@@ -91,6 +95,7 @@ public class PeerDiscoveryService : IDisposable
         PeerInfo.PublicKey = peerPublicKeyBuffer;
         PeerInfo.PresharedKey = _identity.PresharedKey;
         PeerInfo.LastSeen = DateTime.Now;
+        PeerInfo.AeadKey = aeadKey;
 
         PeerConnected?.Invoke();
     }
@@ -126,9 +131,11 @@ public class PeerDiscoveryService : IDisposable
             IPAddress = ((IPEndPoint)_tcpClient.Client.RemoteEndPoint!).Address,
             Port = _identity.ListeningPort,
             PublicKey = result.PublicKey,
-            PresharedKey = _identity.PresharedKey,
-            LastSeen = DateTime.Now
+            PresharedKey = result.PresharedKey,
+            LastSeen = DateTime.Now,
+            AeadKey = aeadKey
         };
+        _identity.PresharedKey = result.PresharedKey;
 
         PeerConnected?.Invoke();
     }
@@ -138,88 +145,126 @@ public class PeerDiscoveryService : IDisposable
 
 
     public async Task SendMessageAsync(byte[] message)
-    {
-        if (_identity is null || PeerInfo is null) return;
+{
+    if (_identity is null || PeerInfo is null) return;
 
-        if (_tcpClient is null || !_tcpClient.Connected || _networkStream is null || !_networkStream.CanWrite)
+    if (_tcpClient is null || !_tcpClient.Connected || _networkStream is null || !_networkStream.CanWrite)
+    {
+        PeerDisconnected?.Invoke();
+        return;
+    }
+
+    try
+    {
+        var sharedSecret = Curve25519.GetSharedSecret(_identity.PrivateKey, PeerInfo.PublicKey);
+        var aeadKey = Blake2s.ComputeHash(32, sharedSecret.Concat(_identity.PresharedKey).ToArray());
+
+        var nonce = new byte[12];
+        RandomNumberGenerator.Fill(nonce);
+
+        var chacha20 = new ChaCha20Poly1305(aeadKey);
+
+        var cipherText = new byte[message.Length];
+        var tag = new byte[16];
+
+        chacha20.Encrypt(nonce, message, cipherText, tag);
+
+        ushort totalLength = (ushort)(cipherText.Length + tag.Length);
+
+        var lengthBytes = BitConverter.GetBytes(totalLength);
+
+        if (BitConverter.IsLittleEndian)
+            Array.Reverse(lengthBytes);
+
+        await _networkStream.WriteAsync(lengthBytes.AsMemory(0, 2));
+        await _networkStream.WriteAsync(nonce);
+        await _networkStream.WriteAsync(tag);
+        await _networkStream.WriteAsync(cipherText);
+        await _networkStream.FlushAsync();
+    }
+    catch
+    {
+        _tcpClient?.Dispose();
+        _networkStream = null;
+        PeerDisconnected?.Invoke();
+    }
+}
+
+public async Task ReceiveMessageAsync()
+{
+    while (true)
+    {
+        if (_tcpClient is null || !_tcpClient.Connected || _networkStream is null)
         {
+            Debug.WriteLine("TCP client not connected or network stream is null.");
             PeerDisconnected?.Invoke();
-            return;
+            await Task.Delay(100);
+            continue;
         }
 
         try
         {
-            var sharedSecret = Curve25519.GetSharedSecret(_identity.PrivateKey, PeerInfo.PublicKey);
-            var aeadKey = Blake2s.ComputeHash(32, sharedSecret.Concat(_identity.PresharedKey).ToArray());
+            Debug.WriteLine("Waiting for message...");
 
-            var nonce = new byte[12];
-            RandomNumberGenerator.Fill(nonce);
-
-            var chacha20 = new ChaCha20Poly1305(aeadKey);
-            var cipherText = new byte[message.Length];
-            var tag = new byte[16];
-            chacha20.Encrypt(nonce, message, cipherText, tag);
-
-            ushort totalLength = (ushort)(cipherText.Length + tag.Length);
-            var lengthBytes = BitConverter.GetBytes(totalLength);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(lengthBytes);
-
-            await _networkStream.WriteAsync(lengthBytes.AsMemory(0, 2));
-            await _networkStream.WriteAsync(nonce);
-            await _networkStream.WriteAsync(cipherText);
-            await _networkStream.WriteAsync(tag);
-            await _networkStream.FlushAsync();
-        }
-        catch
-        {
-            _tcpClient?.Dispose();
-            _networkStream = null;
-            PeerDisconnected?.Invoke();
-        }
-    }
-
-    public async Task ReceiveMessageAsync()
-    {
-        while (true)
-        {
-            if (_tcpClient is null || !_tcpClient.Connected || _networkStream is null)
-            {
-                Console.WriteLine("TCP client is not connected or network stream is null.");
-                PeerDisconnected?.Invoke();
-                continue;
-            }
-            Console.WriteLine("Waiting for message...");
             var lengthBytes = new byte[2];
             await ReadFullAsync(_networkStream, lengthBytes, 2);
+
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(lengthBytes);
 
             ushort messageLength = BitConverter.ToUInt16(lengthBytes);
 
+            if (messageLength < 16)
+            {
+                Debug.WriteLine("Invalid message length.");
+                PeerDisconnected?.Invoke();
+                continue;
+            }
+
             var nonce = new byte[12];
             await ReadFullAsync(_networkStream, nonce, 12);
 
+            var tag = new byte[16];
+            await ReadFullAsync(_networkStream, tag, 16);
 
-            var cipherAndTag = new byte[messageLength];
-            await ReadFullAsync(_networkStream, cipherAndTag, messageLength);
+            var cipherTextLength = messageLength - 16;
+            var cipherText = new byte[cipherTextLength];
+
+            await ReadFullAsync(_networkStream, cipherText, cipherTextLength);
 
             var sharedSecret = Curve25519.GetSharedSecret(_identity.PrivateKey, PeerInfo.PublicKey);
             var aeadKey = Blake2s.ComputeHash(32, sharedSecret.Concat(_identity.PresharedKey).ToArray());
 
             var chacha20 = new ChaCha20Poly1305(aeadKey);
-            var plainText = new byte[messageLength - 16];
-            chacha20.Decrypt(nonce, cipherAndTag[..(messageLength - 16)], plainText, cipherAndTag[(messageLength - 16)..]);
+
+            var plainText = new byte[cipherTextLength];
+
+            chacha20.Decrypt(nonce, cipherText, tag, plainText);
 
             if (plainText.Length == 0)
             {
-                Console.WriteLine("Received empty message.");
+                Debug.WriteLine("Received empty message.");
                 continue;
             }
-            Console.WriteLine($"Received message: {Encoding.UTF8.GetString(plainText)}");
-            MessageReceived?.Invoke(Encoding.UTF8.GetString(plainText));
+
+            var messageString = Encoding.UTF8.GetString(plainText);
+
+            Debug.WriteLine($"Received message: {messageString}");
+
+            MessageReceived?.Invoke(messageString);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Receive failed: {ex.Message}");
+            PeerDisconnected?.Invoke();
+            await Task.Delay(100);
+            continue;
         }
     }
+}
+
+
+
 
     private async Task ReadFullAsync(NetworkStream stream, byte[] buffer, int totalBytes)
     {
@@ -317,5 +362,5 @@ public class PeerDiscoveryService : IDisposable
     }
 
     private record PeerBroadcastMessage(Guid Id, string Username, int TcpPort);
-    private record PeerRequestMessage(Guid Id, string Username, byte[] PublicKey);
+    private record PeerRequestMessage(Guid Id, string Username, byte[] PublicKey, byte[] PresharedKey);
 }

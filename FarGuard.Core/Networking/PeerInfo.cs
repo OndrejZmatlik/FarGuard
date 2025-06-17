@@ -15,6 +15,7 @@ public class PeerInfo
     public int Port { get; set; }
     public byte[] PublicKey { get; set; } = [];
     public byte[] PresharedKey { get; set; } = [];
+    public byte[] AeadKey { get; set; } = [];
     public DateTime LastSeen { get; set; }
 
     public override string ToString()

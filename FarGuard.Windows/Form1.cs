@@ -62,6 +62,11 @@ namespace FarGuard.Windows
                 this.Controls.Add(Chat);
                 Chat.Focus();
                 Chat.Dock = DockStyle.Fill;
+                Chat.SetAeadLabel(Convert.ToBase64String(PeerDiscoveryService.PeerInfo.AeadKey));
+                Chat.SetMyPrivatKeyLabel(Convert.ToBase64String(PeerDiscoveryService._identity.PrivateKey));
+                Chat.SetMyPublicKeyLabel(Convert.ToBase64String(PeerDiscoveryService._identity.PublicKey));
+                Chat.SetPeerPublicKeyLabel(Convert.ToBase64String(PeerDiscoveryService.PeerInfo.PublicKey));
+                Chat.SetPreSharedKeyLabel(Convert.ToBase64String(PeerDiscoveryService._identity.PresharedKey));
             }));
         }
 

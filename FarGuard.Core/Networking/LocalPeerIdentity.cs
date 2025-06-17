@@ -18,7 +18,7 @@ public class LocalPeerIdentity
     public int ListeningPort { get; set; }
     public byte[] PublicKey { get; init; } = [];
     public byte[] PrivateKey { get; init; } = [];
-    public byte[] PresharedKey { get; init; } = [];
+    public byte[] PresharedKey { get; set; } = [];
 
     private const int _tcpPortRangeStart = 40000;
     private const int _tcpPortRangeCount = 100;
