@@ -182,6 +182,8 @@ public class PeerDiscoveryService : IDisposable
     public void Disconnect()
     {
         _tcpClient.Close();
+        if (_tcpListener is not null && _tcpListener.Server.IsBound)
+            _tcpListener.Stop();
         _networkStream?.Dispose();
         _networkStream = null;
         PeerDisconnected?.Invoke();

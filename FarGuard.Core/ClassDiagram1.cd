@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="FarGuard.Core.Networking.LocalPeerIdentity" Collapsed="true">
+    <Position X="6.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Networking\LocalPeerIdentity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FarGuard.Core.Networking.PeerBase" Collapsed="true">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAQAAAAAAQAAAAQACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Networking\PeerBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FarGuard.Core.Networking.PeerInfo" Collapsed="true">
+    <Position X="8.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAgAAACAAA=</HashCode>
+      <FileName>Networking\PeerInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FarGuard.Core.Networking.PeerDiscoveryService" Collapsed="true">
+    <Position X="0.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQQQAAAgQCAgSGCAAgAAGCDAAYgABACAACQAAABAAAQ=</HashCode>
+      <FileName>Networking\PeerDiscoveryService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="System.Object" Collapsed="true">
+    <Position X="4.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="FarGuard.Core.Networking.StaticData" Collapsed="true">
+    <Position X="3" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAACQAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Networking\StaticData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

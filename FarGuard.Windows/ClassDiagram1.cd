@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="FarGuard.Windows.Data.ApplicationDbContext" Collapsed="true">
+    <Position X="5.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAACAAAAAAAAAAAAABAAAAAAAgAAA=</HashCode>
+      <FileName>Data\ApplicationDbContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.EntityFrameworkCore.DbContext" Collapsed="true">
+    <Position X="8.5" Y="1" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FarGuard.Windows.Data.Entities.App" Collapsed="true">
+    <Position X="5.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Data\Entities\App.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FarGuard.Windows.Data.Entities.Client" Collapsed="true">
+    <Position X="7.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Data\Entities\Client.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FarGuard.Windows.Data.Entities.ChatHistory" Collapsed="true">
+    <Position X="9.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAgCAAAAAAAAABAAAAAAAAIAAIAAQ=</HashCode>
+      <FileName>Data\Entities\ChatHistory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FarGuard.Windows.Services.AppService" Collapsed="true">
+    <Position X="12" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAACAAAAACAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\AppService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="System.Object" Collapsed="true">
+    <Position X="10.75" Y="1" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="FarGuard.Windows.Services.ClientService" Collapsed="true">
+    <Position X="14.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAABIAAAAAAAA=</HashCode>
+      <FileName>Services\ClientService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FarGuard.Windows.Services.ChatService" Collapsed="true">
+    <Position X="16.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>Services\ChatService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="FarGuard.Windows.Services.IAppService" Collapsed="true">
+    <Position X="5.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAACAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\IAppService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="FarGuard.Windows.Services.IClientService" Collapsed="true">
+    <Position X="7.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAABIAAAAAAAA=</HashCode>
+      <FileName>Services\IClientService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="FarGuard.Windows.Services.IChatService" Collapsed="true">
+    <Position X="16.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>Services\IChatService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
