@@ -26,6 +26,7 @@ public class PeerDiscoveryService : IDisposable
     public event Action? PeerDisconnected;
     public PeerInfo PeerInfo { get; set; } = new();
     private CancellationTokenSource ReceiveMessageToken = new();
+    private CancellationTokenSource AliveToken = new();
     public void Start()
     {
         LocalIdentity = LocalIdentity.Generate();
@@ -37,14 +38,17 @@ public class PeerDiscoveryService : IDisposable
         this.PeerConnected += () =>
         {
             ReceiveMessageToken = new();
-            _ = Task.Run(() => ReceiveMessageAsync(ReceiveMessageToken.Token));
+            AliveToken = new();
             _token.Cancel();
+            _ = Task.Run(() => ReceiveMessageAsync(ReceiveMessageToken.Token));
+            StartPeerCheck();
         };
 
         this.PeerDisconnected += () =>
         {
             ReceiveMessageToken.Cancel();
             _token = new();
+            AliveToken.Cancel();
             StartTcpListener();
             StartBroadcastServices();
         };
@@ -64,12 +68,12 @@ public class PeerDiscoveryService : IDisposable
 
     public void StartPeerCheck()
     {
-        _ = Task.Run(() => CheckPeerLive());
+        _ = Task.Run(() => CheckPeerLive(AliveToken.Token));
     }
 
-    private void CheckPeerLive()
+    private void CheckPeerLive(CancellationToken cancellationToken)
     {
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             if (_tcpClient.Connected) continue;
             PeerDisconnected?.Invoke();
@@ -152,10 +156,6 @@ public class PeerDiscoveryService : IDisposable
 
         PeerConnected?.Invoke();
     }
-
-
-
-
 
     public async Task SendMessageAsync(byte[] message)
     {
@@ -378,6 +378,8 @@ public class PeerDiscoveryService : IDisposable
         _udpClient.Dispose();
         _tcpClient.Dispose();
         _networkStream?.Dispose();
+        AliveToken.Cancel();
+        ReceiveMessageToken.Cancel();
     }
 
     private record PeerBroadcastMessage(Guid Id, string Username, int TcpPort);

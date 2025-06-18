@@ -60,8 +60,10 @@ namespace FarGuard.Windows
         {
             this.Invoke(new Action(() =>
             {
-                this.Controls.Remove(Chat);
-                this.Controls.Add(networkScan);
+                if (this.Controls.Contains(Chat))
+                    this.Controls.Remove(Chat);
+                if (!this.Controls.Contains(networkScan))
+                    this.Controls.Add(networkScan);
             }));
         }
 
@@ -70,7 +72,8 @@ namespace FarGuard.Windows
         {
             this.Invoke(new Action(() =>
             {
-                this.Controls.Remove(networkScan);
+                if (this.Controls.Contains(networkScan))
+                    this.Controls.Remove(networkScan);
                 Chat.Dock = DockStyle.Fill;
                 Chat.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
                 Chat.Load += (_, _) =>
@@ -93,10 +96,10 @@ namespace FarGuard.Windows
                             Chat.AddMessage(message.Message, message.SenderId == PeerDiscoveryService.LocalIdentity.Id ? "You" : PeerDiscoveryService.PeerInfo.Username, message.CreatedAt);
                         }
                     }
-                    PeerDiscoveryService.StartPeerCheck();
                 };
                 Chat.Disconnect += Disconnect;
-                this.Controls.Add(Chat);
+                if (!this.Controls.Contains(Chat))
+                    this.Controls.Add(Chat);
             }));
         }
 
