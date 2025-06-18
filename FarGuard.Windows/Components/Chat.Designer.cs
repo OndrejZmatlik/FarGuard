@@ -30,15 +30,16 @@
         {
             listBox1 = new ListBox();
             send_btn = new Button();
-            userName_btn = new Button();
             textBox1 = new TextBox();
             infoText_lbl = new Label();
             panel1 = new Panel();
+            disconnect_btn = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
             // listBox1
             // 
+            listBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listBox1.FormattingEnabled = true;
             listBox1.Location = new Point(21, 40);
             listBox1.Name = "listBox1";
@@ -47,6 +48,7 @@
             // 
             // send_btn
             // 
+            send_btn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             send_btn.Location = new Point(450, 428);
             send_btn.Name = "send_btn";
             send_btn.Size = new Size(94, 29);
@@ -55,18 +57,9 @@
             send_btn.UseVisualStyleBackColor = true;
             send_btn.Click += button1_Click;
             // 
-            // userName_btn
-            // 
-            userName_btn.Location = new Point(383, 5);
-            userName_btn.Name = "userName_btn";
-            userName_btn.Size = new Size(161, 29);
-            userName_btn.TabIndex = 2;
-            userName_btn.Text = "Change username";
-            userName_btn.UseVisualStyleBackColor = true;
-            userName_btn.Click += userName_btn_Click;
-            // 
             // textBox1
             // 
+            textBox1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             textBox1.Location = new Point(21, 430);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(422, 27);
@@ -83,16 +76,27 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(disconnect_btn);
             panel1.Controls.Add(infoText_lbl);
             panel1.Controls.Add(send_btn);
             panel1.Controls.Add(textBox1);
-            panel1.Controls.Add(userName_btn);
             panel1.Controls.Add(listBox1);
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(570, 497);
             panel1.TabIndex = 5;
+            // 
+            // disconnect_btn
+            // 
+            disconnect_btn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            disconnect_btn.Location = new Point(450, 5);
+            disconnect_btn.Name = "disconnect_btn";
+            disconnect_btn.Size = new Size(94, 29);
+            disconnect_btn.TabIndex = 5;
+            disconnect_btn.Text = "Disconnect";
+            disconnect_btn.UseVisualStyleBackColor = true;
+            disconnect_btn.Click += disconnect_btn_Click;
             // 
             // Chat
             // 
@@ -111,9 +115,9 @@
 
         private ListBox listBox1;
         private Button send_btn;
-        private Button userName_btn;
         private TextBox textBox1;
         private Label infoText_lbl;
         private Panel panel1;
+        private Button disconnect_btn;
     }
 }

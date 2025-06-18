@@ -14,7 +14,7 @@ namespace FarGuard.Core.Networking;
 public class PeerDiscoveryService : IDisposable
 {
     private readonly UdpClient _udpClient = new();
-    private readonly CancellationTokenSource _token = new();
+    private CancellationTokenSource _token = new();
     public LocalPeerIdentity LocalIdentity = new();
     private TcpListener? _tcpListener;
     private TcpClient _tcpClient = new();
@@ -25,20 +25,41 @@ public class PeerDiscoveryService : IDisposable
     public event Action<PeerInfo>? PeerRequestReceived;
     public event Action? PeerDisconnected;
     public PeerInfo PeerInfo { get; set; } = new();
-
+    private CancellationTokenSource ReceiveMessageToken = new();
     public void Start()
     {
         LocalIdentity = LocalIdentity.Generate();
-        _tcpListener = new TcpListener(IPAddress.Any, LocalIdentity.ListeningPort);
+        _tcpListener = new TcpListener(IPAddress.Any, LocalIdentity.Port);
         _tcpListener.Start();
-        _ = Task.Run(() => AcceptTcpClientAsync(_tcpListener));
-        _ = Task.Run(() => ListenForPeersAsync(_token.Token));
-        _ = Task.Run(() => BroadcastPresenceAsync(_token.Token));
-        
+        StartTcpListener();
+        StartBroadcastServices();
+
         this.PeerConnected += () =>
         {
-            _ = Task.Run(() => ReceiveMessageAsync());
+            ReceiveMessageToken = new();
+            _ = Task.Run(() => ReceiveMessageAsync(ReceiveMessageToken.Token));
+            _token.Cancel();
         };
+
+        this.PeerDisconnected += () =>
+        {
+            ReceiveMessageToken.Cancel();
+            _token = new();
+            StartTcpListener();
+            StartBroadcastServices();
+        };
+    }
+
+    private void StartTcpListener()
+    {
+        if (_tcpListener is null) return;
+        _ = Task.Run(() => AcceptTcpClientAsync(_tcpListener));
+    }
+
+    private void StartBroadcastServices()
+    {
+        _ = Task.Run(() => ListenForPeersAsync(_token.Token));
+        _ = Task.Run(() => BroadcastPresenceAsync(_token.Token));
     }
 
     public void StartPeerCheck()
@@ -89,7 +110,6 @@ public class PeerDiscoveryService : IDisposable
         PeerInfo.PublicKey = peerPublicKeyBuffer;
         PeerInfo.PresharedKey = LocalIdentity.PresharedKey;
         PeerInfo.LastSeen = DateTime.Now;
-        PeerInfo.AeadKey = aeadKey;
 
         PeerConnected?.Invoke();
     }
@@ -123,11 +143,10 @@ public class PeerDiscoveryService : IDisposable
             Id = result.Id,
             Username = result.Username,
             IPAddress = ((IPEndPoint)_tcpClient.Client.RemoteEndPoint!).Address,
-            Port = LocalIdentity.ListeningPort,
+            Port = LocalIdentity.Port,
             PublicKey = result.PublicKey,
             PresharedKey = result.PresharedKey,
-            LastSeen = DateTime.Now,
-            AeadKey = aeadKey
+            LastSeen = DateTime.Now
         };
         LocalIdentity.PresharedKey = result.PresharedKey;
 
@@ -150,31 +169,7 @@ public class PeerDiscoveryService : IDisposable
 
         try
         {
-            var sharedSecret = Curve25519.GetSharedSecret(LocalIdentity.PrivateKey, PeerInfo.PublicKey);
-            var aeadKey = Blake2s.ComputeHash(32, sharedSecret.Concat(LocalIdentity.PresharedKey).ToArray());
-
-            var nonce = new byte[12];
-            RandomNumberGenerator.Fill(nonce);
-
-            var chacha20 = new ChaCha20Poly1305(aeadKey);
-
-            var cipherText = new byte[message.Length];
-            var tag = new byte[16];
-
-            chacha20.Encrypt(nonce, message, cipherText, tag);
-
-            ushort totalLength = (ushort)(cipherText.Length + tag.Length);
-
-            var lengthBytes = BitConverter.GetBytes(totalLength);
-
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(lengthBytes);
-
-            await _networkStream.WriteAsync(lengthBytes.AsMemory(0, 2));
-            await _networkStream.WriteAsync(nonce);
-            await _networkStream.WriteAsync(tag);
-            await _networkStream.WriteAsync(cipherText);
-            await _networkStream.FlushAsync();
+            await this.SendEncryptedDataAsync(message);
         }
         catch
         {
@@ -184,22 +179,60 @@ public class PeerDiscoveryService : IDisposable
         }
     }
 
-    public async Task ReceiveMessageAsync()
+    public void Disconnect()
     {
-        while (true)
+        _tcpClient.Close();
+        _networkStream?.Dispose();
+        _networkStream = null;
+        PeerDisconnected?.Invoke();
+    }
+
+    private async Task SendEncryptedDataAsync(byte[] data)
+    {
+        if (_networkStream is null || !_networkStream.CanWrite || _tcpClient is null || !_tcpClient.Connected)
+        {
+            PeerDisconnected?.Invoke();
+            return;
+        }
+        var sharedSecret = Curve25519.GetSharedSecret(LocalIdentity.PrivateKey, PeerInfo.PublicKey);
+        var aeadKey = Blake2s.ComputeHash(32, sharedSecret.Concat(LocalIdentity.PresharedKey).ToArray());
+
+        var nonce = new byte[12];
+        RandomNumberGenerator.Fill(nonce);
+
+        var chacha20 = new ChaCha20Poly1305(aeadKey);
+        var cipherText = new byte[data.Length];
+        var tag = new byte[16];
+
+        chacha20.Encrypt(nonce, data, cipherText, tag);
+
+        ushort totalLength = (ushort)(cipherText.Length + tag.Length);
+
+        var lengthBytes = BitConverter.GetBytes(totalLength);
+
+        if (BitConverter.IsLittleEndian)
+            Array.Reverse(lengthBytes);
+
+        await _networkStream.WriteAsync(lengthBytes.AsMemory(0, 2));
+        await _networkStream.WriteAsync(nonce);
+        await _networkStream.WriteAsync(tag);
+        await _networkStream.WriteAsync(cipherText);
+        await _networkStream.FlushAsync();
+    }
+
+    public async Task ReceiveMessageAsync(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
         {
             if (_tcpClient is null || !_tcpClient.Connected || _networkStream is null)
             {
-                Debug.WriteLine("TCP client not connected or network stream is null.");
                 PeerDisconnected?.Invoke();
-                await Task.Delay(100);
+                await Task.Delay(100, cancellationToken);
                 continue;
             }
 
             try
             {
-                Debug.WriteLine("Waiting for message...");
-
                 var lengthBytes = new byte[2];
                 await ReadFullAsync(_networkStream, lengthBytes, 2);
 
@@ -210,7 +243,6 @@ public class PeerDiscoveryService : IDisposable
 
                 if (messageLength < 16)
                 {
-                    Debug.WriteLine("Invalid message length.");
                     PeerDisconnected?.Invoke();
                     continue;
                 }
@@ -235,23 +267,16 @@ public class PeerDiscoveryService : IDisposable
 
                 chacha20.Decrypt(nonce, cipherText, tag, plainText);
 
-                if (plainText.Length == 0)
-                {
-                    Debug.WriteLine("Received empty message.");
-                    continue;
-                }
+                if (plainText.Length == 0) continue;
 
                 var messageString = Encoding.UTF8.GetString(plainText);
 
-                Debug.WriteLine($"Received message: {messageString}");
-
                 MessageReceived?.Invoke(messageString);
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.WriteLine($"Receive failed: {ex.Message}");
                 PeerDisconnected?.Invoke();
-                await Task.Delay(100);
+                await Task.Delay(100, cancellationToken);
                 continue;
             }
         }
@@ -281,7 +306,7 @@ public class PeerDiscoveryService : IDisposable
             var message = new PeerBroadcastMessage(
                 Id: LocalIdentity.Id,
                 Username: LocalIdentity.Username,
-                TcpPort: LocalIdentity.ListeningPort
+                TcpPort: LocalIdentity.Port
             );
 
             var bytes = JsonSerializer.SerializeToUtf8Bytes(message);

@@ -13,7 +13,7 @@ namespace FarGuard.Windows.Components
     public partial class Chat : UserControl
     {
         public event Action<string>? MessageSent;
-        public event Action? UserNameChanged;
+        public event Action? Disconnect;
         public Chat()
         {
             InitializeComponent();
@@ -55,9 +55,9 @@ namespace FarGuard.Windows.Components
             textBox1.Focus();
         }
 
-        private void userName_btn_Click(object sender, EventArgs e)
+        private void disconnect_btn_Click(object sender, EventArgs e)
         {
-            UserNameChanged?.Invoke();
+            Disconnect?.Invoke();
         }
     }
 }

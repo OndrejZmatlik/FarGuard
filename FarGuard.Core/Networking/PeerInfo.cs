@@ -7,15 +7,9 @@ using System.Threading.Tasks;
 
 namespace FarGuard.Core.Networking;
 
-public class PeerInfo
+public class PeerInfo : PeerBase
 {
-    public Guid Id { get; set; }
-    public string Username { get; set; } = string.Empty;
     public IPAddress IPAddress { get; set; } = IPAddress.None;
-    public int Port { get; set; }
-    public byte[] PublicKey { get; set; } = [];
-    public byte[] PresharedKey { get; set; } = [];
-    public byte[] AeadKey { get; set; } = [];
     public DateTime LastSeen { get; set; }
 
     public override string ToString()

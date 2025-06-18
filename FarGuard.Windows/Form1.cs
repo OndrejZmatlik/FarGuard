@@ -75,7 +75,7 @@ namespace FarGuard.Windows
                 Chat.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
                 Chat.Load += (_, _) =>
                 {
-                    Chat.SetTitle($"Listening at 0.0.0.0:{PeerDiscoveryService.LocalIdentity.ListeningPort}");
+                    Chat.SetTitle($"Listening at 0.0.0.0:{PeerDiscoveryService.LocalIdentity.Port}");
                     var client = clientService.GetClientAsync(PeerDiscoveryService.PeerInfo.Id).GetAwaiter().GetResult();
                     if (client is null)
                     {
@@ -95,10 +95,12 @@ namespace FarGuard.Windows
                     }
                     PeerDiscoveryService.StartPeerCheck();
                 };
-                Chat.UserNameChanged += ChangeUserName;
+                Chat.Disconnect += Disconnect;
                 this.Controls.Add(Chat);
             }));
         }
+
+        private void Disconnect() => PeerDiscoveryService.Disconnect();
 
         private void PeerSelected(PeerInfo info)
         {

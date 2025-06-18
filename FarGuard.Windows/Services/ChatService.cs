@@ -32,7 +32,7 @@ public class ChatService : IChatService
             .Where(ch => ch.ClientId == clientId || ch.SenderId == clientId)
             .Include(x => x.Client)
             .Include(x => x.Sender)
-            .OrderByDescending(ch => ch.CreatedAt)
+            .OrderBy(ch => ch.CreatedAt)
             .ToListAsync();
     }
 }

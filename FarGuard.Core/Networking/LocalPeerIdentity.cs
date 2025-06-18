@@ -12,14 +12,9 @@ using System.Threading.Tasks;
 
 namespace FarGuard.Core.Networking;
 
-public class LocalPeerIdentity
+public class LocalPeerIdentity : PeerBase
 {
-    public Guid Id { get; set; }
-    public string Username { get; set; } = Environment.UserName;
-    public int ListeningPort { get; set; }
-    public byte[] PublicKey { get; init; } = [];
-    public byte[] PrivateKey { get; init; } = [];
-    public byte[] PresharedKey { get; set; } = [];
+    public byte[] PrivateKey { get; set; } = [];
     public LocalPeerIdentity Generate()
     {
         var privateKey = Curve25519.CreateRandomPrivateKey();
@@ -36,7 +31,7 @@ public class LocalPeerIdentity
             PrivateKey = privateKey,
             PublicKey = publicKey,
             PresharedKey = psk,
-            ListeningPort = port
+            Port = port
         };
     }
 
