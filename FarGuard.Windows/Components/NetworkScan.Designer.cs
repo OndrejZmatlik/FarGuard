@@ -33,7 +33,6 @@
             tableLayoutPanel2 = new TableLayoutPanel();
             label1 = new Label();
             tableLayoutPanel3 = new TableLayoutPanel();
-            button1 = new Button();
             button2 = new Button();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
@@ -91,11 +90,9 @@
             // 
             // tableLayoutPanel3
             // 
-            tableLayoutPanel3.ColumnCount = 2;
+            tableLayoutPanel3.ColumnCount = 1;
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel3.Controls.Add(button1, 0, 0);
-            tableLayoutPanel3.Controls.Add(button2, 1, 0);
+            tableLayoutPanel3.Controls.Add(button2, 0, 0);
             tableLayoutPanel3.Dock = DockStyle.Fill;
             tableLayoutPanel3.Location = new Point(3, 106);
             tableLayoutPanel3.Name = "tableLayoutPanel3";
@@ -104,21 +101,11 @@
             tableLayoutPanel3.Size = new Size(498, 98);
             tableLayoutPanel3.TabIndex = 2;
             // 
-            // button1
-            // 
-            button1.Location = new Point(3, 3);
-            button1.Name = "button1";
-            button1.Size = new Size(94, 29);
-            button1.TabIndex = 0;
-            button1.Text = "Create chat";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click_1;
-            // 
             // button2
             // 
-            button2.Location = new Point(252, 3);
+            button2.Location = new Point(3, 3);
             button2.Name = "button2";
-            button2.Size = new Size(158, 29);
+            button2.Size = new Size(154, 33);
             button2.TabIndex = 1;
             button2.Text = "Change username";
             button2.UseVisualStyleBackColor = true;
@@ -145,7 +132,6 @@
         private TableLayoutPanel tableLayoutPanel2;
         private Label label1;
         private TableLayoutPanel tableLayoutPanel3;
-        private Button button1;
         private Button button2;
     }
 }

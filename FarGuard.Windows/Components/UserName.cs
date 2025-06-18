@@ -16,7 +16,18 @@ namespace FarGuard.Windows.Components
         public UserName()
         {
             InitializeComponent();
-            this.textBox1.Text = Environment.UserName;
+            if (string.IsNullOrWhiteSpace(this.textBox1.Text))
+            {
+                this.textBox1.Text = Environment.UserName;
+            }
+        }
+
+        public void SetUserName(string userName)
+        {
+            this.Invoke(() =>
+            {
+                this.textBox1.Text = userName;
+            });
         }
 
         private void button1_Click(object sender, EventArgs e)

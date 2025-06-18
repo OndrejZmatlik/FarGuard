@@ -29,124 +29,91 @@
         private void InitializeComponent()
         {
             listBox1 = new ListBox();
-            button1 = new Button();
-            button2 = new Button();
+            send_btn = new Button();
+            userName_btn = new Button();
             textBox1 = new TextBox();
-            label1 = new Label();
-            label2 = new Label();
-            label3 = new Label();
-            label4 = new Label();
-            label5 = new Label();
+            infoText_lbl = new Label();
+            panel1 = new Panel();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // listBox1
             // 
             listBox1.FormattingEnabled = true;
-            listBox1.Location = new Point(3, 214);
+            listBox1.Location = new Point(21, 40);
             listBox1.Name = "listBox1";
-            listBox1.Size = new Size(973, 244);
+            listBox1.Size = new Size(523, 384);
             listBox1.TabIndex = 0;
             // 
-            // button1
+            // send_btn
             // 
-            button1.Location = new Point(882, 466);
-            button1.Name = "button1";
-            button1.Size = new Size(94, 29);
-            button1.TabIndex = 1;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            send_btn.Location = new Point(450, 428);
+            send_btn.Name = "send_btn";
+            send_btn.Size = new Size(94, 29);
+            send_btn.TabIndex = 1;
+            send_btn.Text = "Send";
+            send_btn.UseVisualStyleBackColor = true;
+            send_btn.Click += button1_Click;
             // 
-            // button2
+            // userName_btn
             // 
-            button2.Location = new Point(882, 7);
-            button2.Name = "button2";
-            button2.Size = new Size(94, 29);
-            button2.TabIndex = 2;
-            button2.Text = "button2";
-            button2.UseVisualStyleBackColor = true;
+            userName_btn.Location = new Point(383, 5);
+            userName_btn.Name = "userName_btn";
+            userName_btn.Size = new Size(161, 29);
+            userName_btn.TabIndex = 2;
+            userName_btn.Text = "Change username";
+            userName_btn.UseVisualStyleBackColor = true;
+            userName_btn.Click += userName_btn_Click;
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(3, 467);
+            textBox1.Location = new Point(21, 430);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(873, 27);
+            textBox1.Size = new Size(422, 27);
             textBox1.TabIndex = 3;
             // 
-            // label1
+            // infoText_lbl
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(3, 7);
-            label1.Name = "label1";
-            label1.Size = new Size(50, 20);
-            label1.TabIndex = 4;
-            label1.Text = "label1";
+            infoText_lbl.AutoSize = true;
+            infoText_lbl.Location = new Point(21, 14);
+            infoText_lbl.Name = "infoText_lbl";
+            infoText_lbl.Size = new Size(35, 20);
+            infoText_lbl.TabIndex = 4;
+            infoText_lbl.Text = "Info";
             // 
-            // label2
+            // panel1
             // 
-            label2.AutoSize = true;
-            label2.Location = new Point(3, 36);
-            label2.Name = "label2";
-            label2.Size = new Size(50, 20);
-            label2.TabIndex = 5;
-            label2.Text = "label2";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(3, 66);
-            label3.Name = "label3";
-            label3.Size = new Size(50, 20);
-            label3.TabIndex = 6;
-            label3.Text = "label3";
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(3, 98);
-            label4.Name = "label4";
-            label4.Size = new Size(50, 20);
-            label4.TabIndex = 7;
-            label4.Text = "label4";
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Location = new Point(3, 127);
-            label5.Name = "label5";
-            label5.Size = new Size(50, 20);
-            label5.TabIndex = 8;
-            label5.Text = "label5";
+            panel1.Controls.Add(infoText_lbl);
+            panel1.Controls.Add(send_btn);
+            panel1.Controls.Add(textBox1);
+            panel1.Controls.Add(userName_btn);
+            panel1.Controls.Add(listBox1);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(570, 497);
+            panel1.TabIndex = 5;
             // 
             // Chat
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(label5);
-            Controls.Add(label4);
-            Controls.Add(label3);
-            Controls.Add(label2);
-            Controls.Add(label1);
-            Controls.Add(textBox1);
-            Controls.Add(button2);
-            Controls.Add(button1);
-            Controls.Add(listBox1);
+            Controls.Add(panel1);
             Name = "Chat";
-            Size = new Size(991, 497);
+            Size = new Size(570, 497);
+            Load += Chat_Load;
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
         private ListBox listBox1;
-        private Button button1;
-        private Button button2;
+        private Button send_btn;
+        private Button userName_btn;
         private TextBox textBox1;
-        private Label label1;
-        private Label label2;
-        private Label label3;
-        private Label label4;
-        private Label label5;
+        private Label infoText_lbl;
+        private Panel panel1;
     }
 }

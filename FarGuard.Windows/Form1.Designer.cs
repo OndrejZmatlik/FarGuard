@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             networkScan = new FarGuard.Windows.Components.NetworkScan();
             SuspendLayout();
             // 
@@ -36,17 +37,18 @@
             networkScan.Dock = DockStyle.Fill;
             networkScan.Location = new Point(0, 0);
             networkScan.Name = "networkScan";
-            networkScan.Size = new Size(800, 450);
+            networkScan.Size = new Size(572, 475);
             networkScan.TabIndex = 0;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(572, 475);
             Controls.Add(networkScan);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
-            Text = "Form1";
+            Text = "FarGuard";
             ResumeLayout(false);
         }
 

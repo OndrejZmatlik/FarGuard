@@ -13,27 +13,18 @@ namespace FarGuard.Windows.Components
     public partial class Chat : UserControl
     {
         public event Action<string>? MessageSent;
+        public event Action? UserNameChanged;
         public Chat()
         {
             InitializeComponent();
         }
 
-        public void AddPeerMessage(string message, string userName)
+        public void AddMessage(string message, string username, DateTime time)
         {
             this.Invoke(() =>
             {
                 if (string.IsNullOrWhiteSpace(message)) return;
-                this.listBox1.Items.Add($"{DateTime.Now:HH:mm:ss} - {userName}: {message}");
-                this.listBox1.SelectedIndex = this.listBox1.Items.Count - 1;
-            });
-        }
-
-        public void AddMessage(string message)
-        {
-            this.Invoke(() =>
-            {
-                if (string.IsNullOrWhiteSpace(message)) return;
-                this.listBox1.Items.Add($"{DateTime.Now:HH:mm:ss} - You: {message}");
+                this.listBox1.Items.Add($"{time:HH:mm:ss} - {username}: {message}");
                 this.listBox1.SelectedIndex = this.listBox1.Items.Count - 1;
             });
         }
@@ -51,44 +42,22 @@ namespace FarGuard.Windows.Components
             MessageSent?.Invoke(this.textBox1.Text);
         }
 
-        public void SetAeadLabel(string l)
-        {
-            this.Invoke(() =>
- {
-     this.label1.Text = l;
- });
-        }
-
-        public void SetMyPrivatKeyLabel(string l)
+        public void SetTitle(string title)
         {
             this.Invoke(() =>
             {
-                this.label2.Text = "MyPrivate: " + l;
+                this.infoText_lbl.Text = title;
             });
         }
 
-        public void SetMyPublicKeyLabel(string l)
+        private void Chat_Load(object sender, EventArgs e)
         {
-            this.Invoke(() =>
-            {
-                this.label3.Text = "MyPublic: " + l;
-            });
+            textBox1.Focus();
         }
 
-        public void SetPeerPublicKeyLabel(string l)
+        private void userName_btn_Click(object sender, EventArgs e)
         {
-            this.Invoke(() =>
-            {
-                this.label4.Text = "PeerPublic: " + l;
-            });
-        }
-
-        public void SetPreSharedKeyLabel(string l)
-        {
-            this.Invoke(() =>
-            {
-                this.label5.Text = "PreShared: " + l;
-            });
+            UserNameChanged?.Invoke();
         }
     }
 }
